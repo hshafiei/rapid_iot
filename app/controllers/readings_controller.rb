@@ -12,6 +12,6 @@ class ReadingsController < ApplicationController
   private
 
   def reading_params
-    params.permit(:thermostat_id, :temperature, :humidity, :battery_charge)
+    params.permit(:thermostat_id, :temperature, :humidity, :battery_charge, :tracking_number, :household_token)
   end
 end

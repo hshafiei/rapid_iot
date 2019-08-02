@@ -19,11 +19,18 @@ class HouseHold < ApplicationRecord
     where(token: token).first
   end
 
-  def self.inc_tracking_number(token)
+  def self.inc_tracking_number_db(token)
     if from_db(token)
       household = from_db(token)
       household.tracking_number += 1
       household.save
+    end
+  end
+
+  def self.inc_tracking_number_store(token)
+    if in_store(token)
+      key = "household_#{token}"
+      RedisStore.store(key, self.tracking_number + 1)
     end
   end
 
