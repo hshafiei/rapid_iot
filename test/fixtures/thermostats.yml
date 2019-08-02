@@ -1,0 +1,9 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  household_token: MyText
+  location: MyText
+
+two:
+  household_token: MyText
+  location: MyText
