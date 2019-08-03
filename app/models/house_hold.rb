@@ -43,7 +43,7 @@ class HouseHold < ApplicationRecord
     "household_#{args[:token]}"
   end
 
-  def redis_data
+  def serial_data
     self.tracking_number
   end
 

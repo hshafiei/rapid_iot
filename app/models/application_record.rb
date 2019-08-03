@@ -11,7 +11,9 @@ class ApplicationRecord < ActiveRecord::Base
   def self.get_store_db(args)
     obj = from_db(args)
     klass = obj.class # Since we are dealing with class method
-    klass.store_in_redis(klass.key(args), obj.redis_data) if obj
+    klass.store_in_redis(klass.key(args), obj.serial_data) if obj
+    p klass.key(args) if obj
+    p obj.serial_data if obj
     return obj
   end
 

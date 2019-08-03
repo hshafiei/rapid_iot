@@ -15,9 +15,8 @@
 #  uuid                 :varchar
 
 class Reading < ApplicationRecord
-  extend RedisStore
-  belongs_to :thermostat
 
+  belongs_to :thermostat
   after_save :add_to_store
 
   # This updates the redis after actually saving to the db
@@ -34,6 +33,7 @@ class Reading < ApplicationRecord
     if self.store_in_redis
       # To increment the tracking number in the redis, in the case a request before saving in db gets to the server
       HouseHold.inc_tracking_number_store(token: self.household_token)
+      Thermostat.notfiy_new_reading(self, {id: self.thermostat_id})
       differed_save
     end
   end
@@ -59,8 +59,8 @@ class Reading < ApplicationRecord
     "#{self.household_token}_#{self.tracking_number}"
   end
 
-  def redis_data
-    self
+  def serial_data
+    self.to_json
   end
 
   # Stores in redis
