@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_08_02_155357) do
+ActiveRecord::Schema.define(version: 2019_08_03_113346) do
 
   create_table "house_holds", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
     t.text "token"
@@ -29,6 +29,16 @@ ActiveRecord::Schema.define(version: 2019_08_02_155357) do
     t.datetime "updated_at", null: false
     t.text "household_token"
     t.string "uuid"
+  end
+
+  create_table "stats", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
+    t.integer "thermostat_id"
+    t.string "sensor_type"
+    t.float "avg"
+    t.float "min"
+    t.float "max"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "thermostats", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
