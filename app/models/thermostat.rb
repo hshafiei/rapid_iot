@@ -17,23 +17,20 @@ class Thermostat < ApplicationRecord
     ['temperature', 'humidity', 'battery_charge']
   end
 
-  def self.notfiy_new_reading(reading, thermostat)
-    in_store(thermostat)? in_store(thermostat) : get_store_db(thermostat)
+  def self.notfiy_new_reading(reading)
     update_stats(reading)
   end
 
   def self.update_stats(reading)
     for sensor_type in sensor_types
-      Stat.update_sensor_stats({sensor_type: sensor_type, thermostat_id: reading.thermostat_id}, reading.send(sensor_type))
+      arg = thermostat_sensor(sensor_type, reading)
+      value = reading.send(sensor_type)
+      Stat.store_stat(arg, value)
     end
   end
 
-  def self.key(args)
-    "thermostat_#{args[:id]}"
-  end
-
-  def serial_data
-    self.to_json
+  def thermostat_sensor(type, reading)
+    {sensor_type: sensor_type, thermostat_id: reading.thermostat_id}
   end
 
 end

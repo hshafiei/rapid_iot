@@ -1,35 +1,47 @@
 class Stat < ApplicationRecord
   include RedisStore
   belongs_to :thermostat
+  after_create :save_in_redis
 
-  after_save :add_to_store
-
-  # This updates the redis after saving to the db
-  def add_to_store
-    self.store_in_redis
+  def self.store_stat(args, value)
+    compare_values(args, value)
   end
 
-
-  def self.update_sensor_stats(args, value)
-    in_store(args)? in_store(args) : get_store_db(args)
-  end
-
-  def compare_values(args, value)
-    stat = retrieve_from_redis(args)
+  def self.compare_values(args, value)
+    stat = fast_find(args)
     if stat
-      stat.max = value if value > stat.max
-      stat.min = value if value < stat.min
+      hash = {}
+      hash[:max] = value if value > extract_from_hash(stat, 'max')
+      hash[:min] = value if value < extract_from_hash(stat, 'min')
       #stat.sum = stat.sum + value
-      store_in_redis(key(args), stat)
+      fast_update(args, hash)
+    else
+      new_args = merged_hash(args, all_same(value))
+      Stat.new(new_args).fast_create
     end
   end
 
-  def self.key(args)
-    "thermostat_#{args[:sensor_type]}_#{args[:thermostat_id]}"
+  def self.extract_from_hash(stat, arg)
+    stat['data'][arg].to_f
   end
 
-  def redis_data
-    self.to_json
+
+  def self.all_same(value)
+    {max: value, min: value}
   end
+
+  def self.merged_hash(h1, h2)
+    h1.merge!(h2)
+  end
+
+
+  def self.redis_key(class_name, args)
+    "#{class_name}_#{args[:thermostat_id]}_#{args[:sensor_type]}"
+  end
+
+  def self.find_in_db(args)
+    where(thermostat_id: args[:thermostat_id], sensor_type: args[:sensor_type]).first rescue false
+  end
+
 
 end

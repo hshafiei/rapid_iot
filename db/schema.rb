@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_08_04_092424) do
+ActiveRecord::Schema.define(version: 2019_08_04_201721) do
 
   create_table "house_holds", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
     t.text "token"
@@ -41,6 +41,8 @@ ActiveRecord::Schema.define(version: 2019_08_04_092424) do
     t.float "max"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "uuid"
+    t.index ["uuid"], name: "index_stats_on_uuid"
   end
 
   create_table "thermostats", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
@@ -48,6 +50,8 @@ ActiveRecord::Schema.define(version: 2019_08_04_092424) do
     t.text "location"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "uuid"
+    t.index ["uuid"], name: "index_thermostats_on_uuid"
   end
 
 end

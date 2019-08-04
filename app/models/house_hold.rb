@@ -26,8 +26,14 @@ class HouseHold < ApplicationRecord
   # until eventaully it stores in DB
 
   def self.inc_tracking_number(args)
+    hash = increment(args)
+    extract_tracking_number(hash) if hash
+  end
+
+  def self.increment(args)
     household = fast_find(args)
     fast_update(args, update_args(household)) if household
+    return fast_find(args)
   end
 
   def self.update_args(household)

@@ -15,10 +15,12 @@ class ApplicationRecord < ActiveRecord::Base
   # Gets reading from DB and store it in redis to speedup future requests
   def self.from_db_to_redis(args)
     obj = find_in_db(args)
-    key = klass.redis_key(klass.name,obj)
-    data = obj.serial_data
-    klass.store_in_redis(key,data) if obj
-    return klass.find_in_redis(args)
+    if obj
+      key = klass.redis_key(klass.name,obj)
+      data = obj.serial_data
+      klass.store_in_redis(key,data)
+      return klass.find_in_redis(args)
+    end
   end
 
   # Returns from DB
@@ -27,7 +29,7 @@ class ApplicationRecord < ActiveRecord::Base
   end
 
   def fast_create
-    fast_load ? fast_load : self.save_in_redis && self.differed_create
+    self.save_in_redis && self.differed_create
   end
 
   def self.fast_update(args, update_args)
@@ -47,11 +49,9 @@ class ApplicationRecord < ActiveRecord::Base
   end
 
   def self.differed_update(args, update_args)
+    p redis_key(self.to_s, args)
+    p update_args
     UpdateAsyncWorker.perform_async(redis_key(self.to_s, args), update_args)
-  end
-
-  def fast_load
-    klass.find_in_redis(self)? klass.find_in_redis(self) : klass.from_db_to_redis(self)
   end
 
   def self.fast_find(args)

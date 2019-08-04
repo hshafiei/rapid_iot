@@ -17,50 +17,40 @@
 class Reading < ApplicationRecord
 
   belongs_to :thermostat
-
+  after_create :save_in_redis
 
   # According to https://github.com/mperham/sidekiq/wiki/Best-Practices#1-make-your-jobs-input-small-and-simple
   # it is not the best practice to pass complex ruby object to sidekiq. We here use Redis as a temporary data store
   # Redis is in-memory so it is fast enough.
 
-  def fast_store
+  def fast_save
     fill_tracking_number
-    if self.store_in_redis
-      # To increment the tracking number in the redis, in the case a request before saving in db gets to the server
-      HouseHold.inc_tracking_number_store(token: self.household_token)
-      Thermostat.notfiy_new_reading(self, {id: self.thermostat_id})
-      differed_save
-    end
+    fast_create
+  end
+
+  def self.find_by_tracking_number(args)
+    fast_find(args)
   end
 
   # Gets the last tracking_number and increments it
   def fill_tracking_number
-    self.tracking_number = HouseHold.last_tracking_number(token: self.household_token) + 1
+    self.tracking_number = HouseHold.inc_tracking_number(token: self.household_token)
   end
 
-  # Differs wirting to the db so can the request can scale
-  def differed_save
-    DbSyncWorker.perform_async(self.household_token, self.tracking_number)
+  def self.redis_key(class_name, args)
+    "#{class_name}_#{args[:household_token]}_#{args[:tracking_number]}"
   end
+
+  def self.find_in_db(args)
+    where(household_token: args[:household_token], tracking_number: args[:tracking_number]).first rescue false
+  end
+
+
 
   # Finds readings by tracking_number and household_token the params format is {household_token: 'X', tracking_number: 'Y' }
   # It checks redis first, if it cannot find then tries DB
-  def self.find_by_tracking_number(args)
-    in_store(args)? in_store(args) : get_store_db(args)
-  end
 
 
-  def key
-    "#{self.household_token}_#{self.tracking_number}"
-  end
 
-  def serial_data
-    self.to_json
-  end
-
-  # Stores in redis
-  def store_in_redis
-    RedisStore.store(self.key, self.to_json)
-  end
 
 end
