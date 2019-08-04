@@ -10,13 +10,15 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_08_03_113346) do
+ActiveRecord::Schema.define(version: 2019_08_04_092424) do
 
   create_table "house_holds", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
     t.text "token"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "tracking_number", default: 0
+    t.string "uuid"
+    t.index ["uuid"], name: "index_house_holds_on_uuid"
   end
 
   create_table "readings", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|

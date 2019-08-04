@@ -17,12 +17,7 @@
 class Reading < ApplicationRecord
 
   belongs_to :thermostat
-  after_save :add_to_store
 
-  # This updates the redis after actually saving to the db
-  def add_to_store
-    self.store_in_redis
-  end
 
   # According to https://github.com/mperham/sidekiq/wiki/Best-Practices#1-make-your-jobs-input-small-and-simple
   # it is not the best practice to pass complex ruby object to sidekiq. We here use Redis as a temporary data store

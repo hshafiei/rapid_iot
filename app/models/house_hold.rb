@@ -12,44 +12,43 @@
 class HouseHold < ApplicationRecord
 
   # This hook ensures that after creation houshold is stored in redis
-  after_create :add_to_store
+  after_create :save_in_redis
 
   # It returns the last tracking_number of a given household. It first looks redis for the answer and then tries DB to speed up
   def self.last_tracking_number(args)
-    in_store(args)? in_store(args) : get_store_db(args).tracking_number.to_i
+    household = fast_find(args)
+    extract_tracking_number(household) if household
   end
 
-
-  # Increments the last tracking_number of a household in DB
-  def self.inc_tracking_number_db(token)
-    if from_db(token)
-      household = from_db(token)
-      household.inc_and_save
-    end
-  end
 
   # Increments the last tracking_number of a household in redis
   # This method is spreated from inc_tracking_number_db since we dont want to access DB per request, this keeps tarck of last tracking_number
   # until eventaully it stores in DB
 
-  def self.inc_tracking_number_store(args)
-    tracking_number = retrieve_from_redis(args)
-    store_in_redis(key(args), tracking_number + 1) if tracking_number
+  def self.inc_tracking_number(args)
+    household = fast_find(args)
+    fast_update(args, update_args(household)) if household
+  end
+
+  def self.update_args(household)
+    { 'tracking_number' => extract_tracking_number(household) + 1}
+  end
+
+  def self.extract_tracking_number(args)
+    args['data']['tracking_number']
+  end
+
+  def self.redis_key(class_name, args)
+    "#{class_name}_#{args[:token]}"
   end
 
 
-
-  def self.key(args)
-    "household_#{args[:token]}"
+  def self.find_in_db(args)
+    where(token: args[:token]).first rescue false
   end
 
-  def serial_data
-    self.tracking_number
-  end
-
-  def add_to_store
-    klass = self.class
-    klass.store_in_redis(klass.key(self.token), self.tracking_number)
+  def key
+    {token: self.token}
   end
 
   def inc_and_save
