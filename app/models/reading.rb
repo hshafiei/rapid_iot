@@ -62,7 +62,7 @@ class Reading < ApplicationRecord
   def fast_response
     arg = klass.find_args(self)
     hash = klass.fast_find(arg)
-    return klass.data_extract(hash)
+    return RedisCrud.data_extract(hash)
   end
 
   def the_thermostat
@@ -88,5 +88,10 @@ class Reading < ApplicationRecord
   def household_exists?
     the_household.present? ? true : false
   end
+
+  def klass
+    self.class
+  end
+
 
 end

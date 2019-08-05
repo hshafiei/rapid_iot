@@ -1,5 +1,6 @@
 class CreateAsyncWorker
-  require 'concerns/redis_store'
+  require 'concerns/redis_storage'
+  require 'concerns/redis_crud'
   include Sidekiq::Worker
 
   # def perform(household_token, tracking_number)
@@ -9,7 +10,7 @@ class CreateAsyncWorker
   # end
 
   def perform(redis_key)
-    obj = RedisStore.retrieve(redis_key)
+    obj = RedisStorage.retrieve(redis_key)
     obj['class'].classify.constantize.create(obj['data']) if obj
   end
 end

@@ -10,8 +10,8 @@ class ReadingsController < ApplicationController
   end
 
   def show
-    @reading = Reading.find_by_tracking_number(params)
-    if @reading.blank?
+    @reading = Reading.find_by_tracking_number(reading_params)
+    if !@reading.blank?
       json_response(@reading)
     else
       json_response(nil, :unprocessable_entity, :invalid_input)

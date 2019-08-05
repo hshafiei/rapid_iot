@@ -1,4 +1,4 @@
-module RedisStore
+module RedisStorage
   extend ActiveSupport::Concern
 
   def self.store(key, data)
