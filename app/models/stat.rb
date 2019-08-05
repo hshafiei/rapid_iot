@@ -12,6 +12,7 @@
 
 class Stat < ApplicationRecord
   belongs_to :thermostat
+  validates_presence_of :thermostat_id, :sensor_type
   after_create :save_in_redis
 
   def self.store_stat(args, value)

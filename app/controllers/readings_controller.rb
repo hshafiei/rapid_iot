@@ -1,15 +1,20 @@
 class ReadingsController < ApplicationController
   def create
     @reading = Reading.new(reading_params)
-    @reading.fast_save
+    @response = @reading.fast_save
+    if !@response.blank?
+      json_response(@response, :created, :successful)
+    else
+      json_response(nil, :unprocessable_entity, :invalid_input)
+    end
   end
 
   def show
     @reading = Reading.find_by_tracking_number(params)
-    if @reading
+    if @reading.blank?
       json_response(@reading)
     else
-
+      json_response(nil, :unprocessable_entity, :invalid_input)
     end
   end
 

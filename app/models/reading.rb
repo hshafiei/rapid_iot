@@ -17,6 +17,7 @@
 class Reading < ApplicationRecord
 
   belongs_to :thermostat
+  validates_presence_of :thermostat_id, :temperature, :humidity, :battery_charge
   after_create :save_in_redis
 
   # According to https://github.com/mperham/sidekiq/wiki/Best-Practices#1-make-your-jobs-input-small-and-simple
@@ -24,14 +25,18 @@ class Reading < ApplicationRecord
   # Redis is in-memory so it is fast enough.
 
   def fast_save
-    fill_tracking_number
-    fast_create
-    extract_stat
+    if validate_presence && validate_existence
+      fill_tracking_number
+      fast_create
+      extract_stat
+      return fast_response
+    end
   end
 
   def extract_stat
     Thermostat.notfiy_new_reading(self)
   end
+
   def self.find_by_tracking_number(args)
     reading = fast_find(args)
     reading['data'] if reading
@@ -43,11 +48,45 @@ class Reading < ApplicationRecord
   end
 
   def self.redis_key(class_name, args)
-    "#{class_name}_#{args[:household_token]}_#{args[:tracking_number]}"
+    "#{class_name}_#{args[:thermostat_id]}_#{args[:tracking_number]}"
+  end
+
+  def self.find_args(args)
+    {tracking_number: args[:tracking_number], thermostat_id: args[:thermostat_id]}
   end
 
   def self.find_in_db(args)
-    where(household_token: args[:household_token], tracking_number: args[:tracking_number]).first rescue false
+    where(find_args(args)).first rescue false
+  end
+
+  def fast_response
+    arg = klass.find_args(self)
+    hash = klass.fast_find(arg)
+    return klass.data_extract(hash)
+  end
+
+  def the_thermostat
+    Thermostat.fast_find({id: thermostat_id})
+  end
+
+  def the_household
+    HouseHold.fast_find({token: household_token})
+  end
+
+  def validate_presence
+    thermostat_id.present? && household_token.present? && temperature.present? && humidity.present? && battery_charge.present?
+  end
+
+  def validate_existence
+    thermostat_exists? && household_exists?
+  end
+
+  def thermostat_exists?
+    the_thermostat.present? ? true : false
+  end
+
+  def household_exists?
+    the_household.present? ? true : false
   end
 
 end

@@ -1,6 +1,5 @@
 en:
-  hello: "Hello world"
-  invalid_id: 'Invalid ID is provided'
+  invalid_input: 'Invalid input is provided'
   successful: 'Opreation was successful'
   db_error: 'Database error; please contact admin'
   routing_error: 'The provided link is not valid'

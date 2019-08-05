@@ -12,6 +12,8 @@
 
 class HouseHold < ApplicationRecord
 
+  has_many :thermostats
+
   # This hook ensures that after creation houshold is stored in redis
   after_create :save_in_redis
 

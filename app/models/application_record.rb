@@ -91,5 +91,8 @@ class ApplicationRecord < ActiveRecord::Base
     self
   end
 
+  def self.data_extract(hash)
+    hash['data'] if hash && hash['data']
+  end
 
 end

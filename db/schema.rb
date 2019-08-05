@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_08_05_062656) do
+ActiveRecord::Schema.define(version: 2019_08_05_105453) do
 
   create_table "house_holds", options: "ENGINE=InnoDB DEFAULT CHARSET=latin1", force: :cascade do |t|
     t.text "token"
@@ -53,6 +53,7 @@ ActiveRecord::Schema.define(version: 2019_08_05_062656) do
     t.datetime "updated_at", null: false
     t.string "uuid"
     t.integer "number_of_readings"
+    t.integer "house_hold_id"
     t.index ["uuid"], name: "index_thermostats_on_uuid"
   end
 

@@ -14,6 +14,8 @@
 class Thermostat < ApplicationRecord
   has_many :readings
   has_many :stats
+  validates_presence_of :house_hold_id
+  belongs_to :house_hold
 
   def self.sensor_types
     ['temperature', 'humidity', 'battery_charge']
