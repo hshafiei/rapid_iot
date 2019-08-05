@@ -26,7 +26,7 @@ describe 'POST /readings' do
 end
 
 describe 'GET /readings' do
-  let!(:readings) { create_list(:reading, 10) }
+  let(:readings) { create_list(:reading, 10) }
   let(:tracking_number) { readings.first.tracking_number }
   let(:thermostat_id) { readings.first.thermostat.id }
 

@@ -18,35 +18,39 @@ class Reading < ApplicationRecord
 
   belongs_to :thermostat
   validates_presence_of :thermostat_id, :temperature, :humidity, :battery_charge
-  after_create :save_in_redis
+  after_create :fast_save
 
   # According to https://github.com/mperham/sidekiq/wiki/Best-Practices#1-make-your-jobs-input-small-and-simple
   # it is not the best practice to pass complex ruby object to sidekiq. We here use Redis as a temporary data store
   # Redis is in-memory so it is fast enough.
 
-  def fast_save
+  def save_it
     if validate_presence && validate_existence
       fill_tracking_number
       fast_create
       extract_stat
-      return fast_response
+      return prepare_response
     end
   end
 
+  # Updates the stats table
   def extract_stat
     Thermostat.notfiy_new_reading(self)
   end
 
+  # Accepts tracking_number and thermostat_id and fast_find it
   def self.find_by_tracking_number(args)
     reading = fast_find(args)
     reading['data'] if reading
   end
 
-  # Gets the last tracking_number and increments it
+  # Gets the incremented last tracking_number
   def fill_tracking_number
     self.tracking_number = HouseHold.inc_tracking_number(token: self.household_token)
   end
 
+  # As we are trying to make responses as fast as possible we dont have th ID instantly
+  # we can use uuid but the challange requires to use the following keys
   def self.redis_key(class_name, args)
     "#{class_name}_#{args[:thermostat_id]}_#{args[:tracking_number]}"
   end
@@ -59,20 +63,25 @@ class Reading < ApplicationRecord
     where(find_args(args)).first rescue false
   end
 
-  def fast_response
+  # Prepares and returns the response
+  def prepare_response
     arg = klass.find_args(self)
     hash = klass.fast_find(arg)
     return RedisCrud.data_extract(hash)
   end
 
+  # Returns the thermostat associated with this reading
   def the_thermostat
     Thermostat.fast_find({id: thermostat_id})
   end
 
+  # Returns the household associated with this reading
   def the_household
     HouseHold.fast_find({token: household_token})
   end
 
+  # For now we are just going to implement validation for our fast CRUD
+  # this must be improved later
   def validate_presence
     thermostat_id.present? && household_token.present? && temperature.present? && humidity.present? && battery_charge.present?
   end

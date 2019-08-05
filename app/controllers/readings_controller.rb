@@ -1,7 +1,7 @@
 class ReadingsController < ApplicationController
   def create
     @reading = Reading.new(reading_params)
-    @response = @reading.fast_save
+    @response = @reading.save_it
     if !@response.blank?
       json_response(@response, :created, :successful)
     else

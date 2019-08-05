@@ -1,15 +1,16 @@
 module RedisCrud
   extend ActiveSupport::Concern
-
-  def self.update_redis(obj, args, update_args)
-    hash = find_in_redis(obj, args)
+  # Updates redis
+  def self.update(obj, args, update_args)
+    hash = find(obj, args)
     if hash
       merge_hash(hash, update_args)
       store_in_redis(obj.redis_key(obj.to_s,args), hash.to_json)
     end
   end
 
-  def self.find_in_redis(obj, args)
+  # Find keys in redis and returns values
+  def self.find(obj, args)
     retrieve_from_redis(obj, obj.to_s, args)
   end
 
@@ -28,13 +29,13 @@ module RedisCrud
   end
 
   # Gets reading from DB and store it in redis to speedup future requests
-  def self.from_db_to_redis(caller, args)
+  def self.load_from_db(caller, args)
     obj = caller.find_in_db(args)
     if obj
       key = obj.class.redis_key(obj.class.name,obj)
-      data = obj.serial_data
+      data = obj.redis_value
       store_in_redis(key,data)
-      return find_in_redis(caller, args)
+      return find(caller, args)
     end
   end
 

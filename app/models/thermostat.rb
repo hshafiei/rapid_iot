@@ -17,6 +17,7 @@ class Thermostat < ApplicationRecord
   validates_presence_of :house_hold_id
   belongs_to :house_hold
 
+  # We hard coded these for now. Must be improved later
   def self.sensor_types
     ['temperature', 'humidity', 'battery_charge']
   end
@@ -26,6 +27,7 @@ class Thermostat < ApplicationRecord
     update_stats(reading)
   end
 
+  # Accepts a reading and store stats for each sensor_type
   def self.update_stats(reading)
     for sensor_type in sensor_types
       arg = thermostat_sensor(sensor_type, reading)
@@ -39,6 +41,7 @@ class Thermostat < ApplicationRecord
     {sensor_type: type, thermostat_id: reading.thermostat_id}
   end
 
+  # Finds and increments the number_of_readings. As stated above this is redundancy and must be improved
   def self.inc_number_of_readings(args)
     thermostat = fast_find(args)
     fast_update(args, update_args(thermostat)) if thermostat
@@ -57,6 +60,7 @@ class Thermostat < ApplicationRecord
     "#{class_name}_#{args[:id]}"
   end
 
+  # Overrides the parent's find_in_db to use id
   def self.find_in_db(args)
     where(id: args[:id]).first rescue false
   end

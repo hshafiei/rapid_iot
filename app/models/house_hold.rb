@@ -15,7 +15,7 @@ class HouseHold < ApplicationRecord
   has_many :thermostats
 
   # This hook ensures that after creation houshold is stored in redis
-  after_create :save_in_redis
+  after_create :fast_save
 
   # It returns the last tracking_number of a given household. It first looks redis for the answer and then tries DB to speed up
   def self.last_tracking_number(args)
