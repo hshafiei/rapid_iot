@@ -6,7 +6,11 @@ class ReadingsController < ApplicationController
 
   def show
     @reading = Reading.find_by_tracking_number(params)
-    json_response(@reading['data']) if @reading['data']
+    if @reading
+      json_response(@reading)
+    else
+
+    end
   end
 
   private

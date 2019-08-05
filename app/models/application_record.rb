@@ -49,8 +49,6 @@ class ApplicationRecord < ActiveRecord::Base
   end
 
   def self.differed_update(args, update_args)
-    p redis_key(self.to_s, args)
-    p update_args
     UpdateAsyncWorker.perform_async(redis_key(self.to_s, args), update_args)
   end
 

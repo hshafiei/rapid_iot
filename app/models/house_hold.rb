@@ -8,6 +8,7 @@
 #  tracking_number      :integer
 #  created_at           :datetime
 #  updated_at           :datetime
+#  uuid                 :varchar
 
 class HouseHold < ApplicationRecord
 
@@ -37,7 +38,7 @@ class HouseHold < ApplicationRecord
   end
 
   def self.update_args(household)
-    { 'tracking_number' => extract_tracking_number(household) + 1}
+    {'tracking_number' => extract_tracking_number(household) + 1}
   end
 
   def self.extract_tracking_number(args)
@@ -63,22 +64,3 @@ class HouseHold < ApplicationRecord
   end
 
 end
-
-
-# # Checks if redis has the last tracking_number
-# def self.in_store(token)
-#   retrieve_from_redis(token)
-# end
-#
-# # Gets reading from DB and store it in redis to speedup feature requests
-# def self.get_store_db(token)
-#   houshold = from_db(token)
-#   klass = houshold.class # Since we are dealing with class method
-#   klass.store_in_redis(klass.key(houshold.token), houshold.tracking_number) if houshold
-#   return houshold
-# end
-#
-# # Returns the houshold with given token
-# def self.from_db(token)
-#   where(token: token).first rescue false
-# end

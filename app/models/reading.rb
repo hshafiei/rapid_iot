@@ -26,10 +26,15 @@ class Reading < ApplicationRecord
   def fast_save
     fill_tracking_number
     fast_create
+    extract_stat
   end
 
+  def extract_stat
+    Thermostat.notfiy_new_reading(self)
+  end
   def self.find_by_tracking_number(args)
-    fast_find(args)
+    reading = fast_find(args)
+    reading['data'] if reading
   end
 
   # Gets the last tracking_number and increments it
@@ -44,13 +49,5 @@ class Reading < ApplicationRecord
   def self.find_in_db(args)
     where(household_token: args[:household_token], tracking_number: args[:tracking_number]).first rescue false
   end
-
-
-
-  # Finds readings by tracking_number and household_token the params format is {household_token: 'X', tracking_number: 'Y' }
-  # It checks redis first, if it cannot find then tries DB
-
-
-
 
 end
