@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Fast IoT</title>
+  <meta name="viewport" content="width=device-width">
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,800" rel="stylesheet" type="text/css">
+
+  <!-- syntax highlighting CSS -->
+  <link rel="stylesheet" href="/syntax.css">
+
+  <!-- Custom CSS -->
+
+  <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+  <link rel="stylesheet" href="/main.css">
+</head>
+<body>
+  <section class="content">
+    <article class="splash">
+      <h1 id="geojson"><span class="fkin">Fast IoT</span><span class="fkin"> API</span></h1>
+      <p>
+        We are tasked with the postponement of  database access to the background, in order to scale up the overall system performance and reduce the delays which is specifically useful when dealing with various resource constrained IoT devices with high rate of data generation. The server must be in a consistent state at any given point. Our idea is to put an in-memory storage between database and the application to handle high rates of incoming request, the in-memory storage acts as cache and the database requests are postponed to the background.
+      </p>
+      <p>
+        A set of CRUD style methods are introduced in this API. For example,  <code class="highlighter-rouge">fast_create</code> acts similar to regular  <code class="highlighter-rouge">ActiveRecord::create</code>. However,  it postpones the the database operation to the background.
+      </p>
+
+      <h4>The API</h4>
+      <p>1. <code class="highlighter-rouge">POST readings</code> </p>
+
+      <ul>
+        <li>Accepts <code class="highlighter-rouge">household_token, thermostat_id, temperature, humidity, battery_charge </code> as param</li>
+        <li>It supports <code class="highlighter-rouge">POST</code> method.</li>
+        <li>The path is <code class="highlighter-rouge">/readings</code>.</li>
+        <li>Returns result <code class="highlighter-rouge">json</code> with the <code class="highlighter-rouge">data</code> of the reading, if operation is successful</li>
+        <li>It returns <code class="highlighter-rouge">422</code> error if it can not parse the input</li>
+      </ul>
+      <p>
+        The following example shows such operation:
+      </p>
+      <figure class="highlight">
+      <pre class="prettyprint">
+      <code data-lang="language-bash">
+      <span class="language-curl">
+curl -d '{"thermostat_id": "1", "household_token" : "1111", "temperature" : 1.0,
+"humidity": 2.0, "battery_charge": 2.0  }' -H "Content-Type: application/json"
+-X POST https://agile-wildwood-66481.herokuapp.com/readings
+      </span>
+      </code>
+      </pre>
+      </figure>
+      <p>
+        The result of the above request is as follows:
+      </p>
+<figure class="highlight">
+<pre class="prettyprint">
+<code data-lang="language-json">
+<span class="language-json">
+{"data":{"id":null,"thermostat_id":1,"tracking_number":3,"temperature":1.0,
+"humidity":2.0,"battery_charge":2.0,"created_at":null,"updated_at":null,
+"household_token":"1111","uuid":"4a1ea40"},"message":"Opreation was successful"}
+</span>
+</code>
+</pre>
+</figure>
+
+<p>2. <code class="highlighter-rouge">GET reading</code> </p>
+<ul>
+  <li>Accepts <code class="highlighter-rouge">tracking_number, thermostat_id</code> as param.</li>
+  <li>It supports <code class="highlighter-rouge">GET</code> method.</li>
+  <li>The path is <code class="highlighter-rouge">/readings</code>.
+  <li>Returns json result with <code class="highlighter-rouge">data</code></li>
+  <li>It returns <code class="highlighter-rouge">422</code> error if it can not parse the input.</li>
+</ul>
+<p>
+  The following example shows such operation:
+</p>
+<figure class="highlight">
+<pre class="prettyprint">
+<code data-lang="language-bash">
+<span class="language-curl">
+curl -d '{"thermostat_id": "1","tracking_number": 3}' -H
+"Content-Type: application/json" -X
+GET https://agile-wildwood-66481.herokuapp.com/readings
+
+</span>
+</code>
+</pre>
+</figure>
+
+<p>
+  The result of the above request is as follows:
+</p>
+<figure class="highlight">
+<pre class="prettyprint">
+<code data-lang="language-json">
+<span class="language-json">
+{"data":{"id":null,"thermostat_id":1,"tracking_number":3,"temperature":1.0,
+"humidity":2.0,"battery_charge":2.0,"created_at":null,"updated_at":null,
+"household_token":"1111","uuid":"4a1ea403d77d4225"},
+"message":"Opreation was successful"}
+</span>
+</code>
+</pre>
+</figure>
+
+<p>
+  The <code class="highlighter-rouge">message</code> part of the response in each endpoint contains the details of successful operations or errors.
+</p>
+
+<p>3. <code class="highlighter-rouge">GET stats</code> </p>
+<ul>
+  <li>Accepts <code class="highlighter-rouge">sensor_type, thermostat_id</code> as param.</li>
+  <li>It supports <code class="highlighter-rouge">GET</code> method.</li>
+  <li>The path is <code class="highlighter-rouge">/stats</code>.
+  <li>Returns json result with <code class="highlighter-rouge">data</code></li>
+  <li>It returns <code class="highlighter-rouge">422</code> error if it can not parse the input.</li>
+</ul>
+<p>
+  The following example shows such operation:
+</p>
+<figure class="highlight">
+<pre class="prettyprint">
+<code data-lang="language-bash">
+<span class="language-curl">
+curl -d '{"thermostat_id": "1","sensor_type": "humidity"}' -H
+"Content-Type: application/json" -X
+GET https://agile-wildwood-66481.herokuapp.com/stats
+
+</span>
+</code>
+</pre>
+</figure>
+
+<p>
+  The result of the above request is as follows:
+</p>
+<figure class="highlight">
+<pre class="prettyprint">
+<code data-lang="language-json">
+<span class="language-json">
+{"data":{"id":null,"thermostat_id":1,"sensor_type":"humidity",
+"avg":2.0,"min":2.0,"max":2.0,"created_at":null,"updated_at":null,
+"uuid":"7aad624fa7927e13","sum":2.0},
+"message":"Opreation was successful"}
+</span>
+</code>
+</pre>
+</figure>
+
+
+      </article>
+    </section>
+  </body>
+</html>
