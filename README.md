@@ -17,7 +17,7 @@ For full documentaion please refer to the [project's homepage](https://agile-wil
 
 ## Authors
 
-* *Hossein Shafiei* - [sesaretah](https://github.com/hshafiei)
+* *Hossein Shafiei* - [hshafiei](https://github.com/hshafiei)
 
 ## License
 
